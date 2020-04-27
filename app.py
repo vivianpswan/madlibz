@@ -8,7 +8,8 @@ import random
 urls = (
 	'/', 'index',
 	'/api', 'api',
-	'/api/(\\d+)', 'getMadlib',
+	'/api/madlibs', 'getMadlibs',
+	'/api/madlibs/(\\d+)', 'getMadlib',
 	'/api/(.*)', 'madlibCall'
 )
 
@@ -39,7 +40,22 @@ class api(object):
 	def GET(self):
 		return render.api()
 
-# /api/{id} route
+# /api/madlibs route
+class getMadlibs:
+	def GET(self):
+		# Set headers
+		web.header("Access-Control-Allow-Origin", "*") # Allow all access
+		web.header("Content-Type", "application/json") # Set content type
+
+		# Load json data
+		with open('data/templates.json') as data_file:
+			data = json.load(data_file)
+		data = data["templates"]
+
+		# Get the template
+		return json.dumps(data, indent=4)	# Send data
+
+# /api/madlibs/{id} route
 class getMadlib:
 	def GET(self, id):
 		# Set headers
