@@ -8,6 +8,8 @@ import random
 urls = (
 	'/', 'index',
 	'/api', 'api',
+	'/api/madlibs', 'getMadlibs',
+	'/api/madlibs/(\\d+)', 'getMadlib',
 	'/api/(.*)', 'madlibCall'
 )
 
@@ -38,6 +40,55 @@ class api(object):
 	def GET(self):
 		return render.api()
 
+# /api/madlibs route
+class getMadlibs:
+	def GET(self):
+		# Set headers
+		web.header("Access-Control-Allow-Origin", "*") # Allow all access
+		web.header("Content-Type", "application/json") # Set content type
+
+		# Load json data
+		with open('data/templates.json') as data_file:
+			data = json.load(data_file)
+		data = data["templates"]
+
+		# Insert IDs into the data set
+		for i in range(len(data)):
+			data[i]["id"] = i + 1
+
+		# Get the template
+		return json.dumps(data, indent=4)	# Send data
+
+# /api/madlibs/{id} route
+class getMadlib:
+	def GET(self, id):
+		# Set headers
+		web.header("Access-Control-Allow-Origin", "*") # Allow all access
+		web.header("Content-Type", "application/json") # Set content type
+
+		# Fix up route parameter types
+		id = int(id)
+
+		# Load json data
+		with open('data/templates.json') as data_file:
+			data = json.load(data_file)
+		data = data["templates"]
+
+		# Check if elements exist
+		data_count = len(data)
+		if data_count < 1:
+			return json.dumps({"error": "Invalid length range - No templates exist"})
+		if id == 0 or data_count < id:
+			return json.dumps({"error": "Invalid ID - That template doesn't exist"})
+
+		index = id - 1
+
+		# Insert the ID
+		data[index]["id"] = id
+
+		# Get the template
+		return json.dumps(data[index], indent=4)	# Send data
+
 # /api/random route
 class madlibCall(object):
 	def GET(self, type):
@@ -59,7 +110,7 @@ class madlibCall(object):
 				minlength = int(i["minlength"])
 			if maxlength < minlength: # Can't have min greater than max!
 				maxlength, minlength = minlength, maxlength # Swap variables
-			print minlength, maxlength
+
 			# Filter the data based on length
 			new_data = [elem for elem in data["templates"] if (len(elem["blanks"]) <= maxlength and len(elem["blanks"]) >= minlength)]
 			# Check if elements exist
