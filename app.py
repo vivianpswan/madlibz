@@ -8,8 +8,8 @@ import random
 urls = (
 	'/', 'index',
 	'/api', 'api',
-	'/api/(\\d+)', 'getMadlib'
-	'/api/(.*)', 'madlibCall',
+	'/api/(\\d+)', 'getMadlib',
+	'/api/(.*)', 'madlibCall'
 )
 
 # Set app and render
@@ -42,18 +42,29 @@ class api(object):
 # /api/{id} route
 class getMadlib:
 	def GET(self, id):
+		# Set headers
+		web.header("Access-Control-Allow-Origin", "*") # Allow all access
+		web.header("Content-Type", "application/json") # Set content type
+
+		# Fix up route parameter types
+		id = int(id)
+
 		# Load json data
 		with open('data/templates.json') as data_file:
 			data = json.load(data_file)
+		data = data["templates"]
 
 		# Check if elements exist
 		data_count = len(data)
 		if data_count < 1:
 			return json.dumps({"error": "Invalid length range - No templates exist"})
-		if data_count < id:
+		if id == 0 or data_count < id:
 			return json.dumps({"error": "Invalid ID - That template doesn't exist"})
+
+		index = id - 1
+
 		# Get the template
-		return json.dumps(data[id - 1], indent=4)	# Send data
+		return json.dumps(data[index], indent=4)	# Send data
 
 # /api/random route
 class madlibCall(object):
