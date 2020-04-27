@@ -52,6 +52,10 @@ class getMadlibs:
 			data = json.load(data_file)
 		data = data["templates"]
 
+		# Insert IDs into the data set
+		for i in range(len(data)):
+			data[i]["id"] = i + 1
+
 		# Get the template
 		return json.dumps(data, indent=4)	# Send data
 
@@ -78,6 +82,9 @@ class getMadlib:
 			return json.dumps({"error": "Invalid ID - That template doesn't exist"})
 
 		index = id - 1
+
+		# Insert the ID
+		data[index]["id"] = id
 
 		# Get the template
 		return json.dumps(data[index], indent=4)	# Send data
